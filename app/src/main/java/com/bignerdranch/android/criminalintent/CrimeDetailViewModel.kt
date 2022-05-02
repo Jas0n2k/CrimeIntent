@@ -1,9 +1,7 @@
 package com.bignerdranch.android.criminalintent
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
+import kotlinx.coroutines.launch
 import java.util.*
 
 class CrimeDetailViewModel : ViewModel() {
@@ -33,11 +31,15 @@ class CrimeDetailViewModel : ViewModel() {
     }
 
     fun saveCrime() {
-        crimeLiveData.value?.let { crimeRepository.updateCrime(it) }
+        viewModelScope.launch {
+            crimeLiveData.value?.let { crimeRepository.updateCrime(it) }
+        }
     }
 
 
     fun addCrime(crime: Crime) {
-        crimeRepository.addCrime(crime)
+        viewModelScope.launch {
+            crimeRepository.addCrime(crime)
+        }
     }
 }
