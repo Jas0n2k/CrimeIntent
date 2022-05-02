@@ -9,27 +9,31 @@ import java.util.*
 class CrimeDetailViewModel : ViewModel() {
 
     private val crimeRepository = CrimeRepository.get()
-    private val crimeIdLiveData = MutableLiveData<UUID>()
-    var crimeLiveData: LiveData<Crime> =
+
+    private val crimeIdLiveData: MutableLiveData<UUID> = MutableLiveData<UUID>()
+    val crimeLiveData: LiveData<Crime> =
         Transformations.switchMap(crimeIdLiveData) {
             crimeRepository.getCrime(it)
         }
+
     private val _crimeDateLiveData: MutableLiveData<Date> =
         MutableLiveData<Date>().apply {
             value = crimeLiveData.value?.date
         }
+
     val crimeDateLiveData: LiveData<Date> = _crimeDateLiveData
+
     fun loadCrime(crimeId: UUID) {
         crimeIdLiveData.value = crimeId
     }
 
     fun updateDate(date: Date) {
-        crimeLiveData.value?.date = date
         _crimeDateLiveData.value = date
+        crimeLiveData.value?.date = date
     }
 
-    fun saveCrime(crime: Crime) {
-        crimeRepository.updateCrime(crime)
+    fun saveCrime() {
+        crimeLiveData.value?.let { crimeRepository.updateCrime(it) }
     }
 
 
