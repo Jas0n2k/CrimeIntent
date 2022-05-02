@@ -62,6 +62,9 @@ class CrimeFragment : Fragment() {
                 updateUI()
             }
         }
+        crimeDetailViewModel.crimeDateLiveData.observe(viewLifecycleOwner) {
+            dateButton.text = crime.date.toString()
+        }
         val titleWatcher = object : TextWatcher {
             override fun beforeTextChanged(
                 sequence: CharSequence?,
