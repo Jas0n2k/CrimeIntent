@@ -10,6 +10,7 @@ class CrimeDetailViewModel : ViewModel() {
 
     private val crimeRepository = CrimeRepository.get()
     private val crimeIdLiveData = MutableLiveData<UUID>()
+    val crimeDateLiveData = MutableLiveData<Date>()
     var crimeLiveData: LiveData<Crime> =
         Transformations.switchMap(crimeIdLiveData) {
             crimeRepository.getCrime(it)
@@ -20,7 +21,7 @@ class CrimeDetailViewModel : ViewModel() {
     }
 
     fun updateDate(date: Date) {
-        crimeLiveData.value?.date = date
+        crimeDateLiveData.value = date
     }
 
     fun saveCrime(crime: Crime) {

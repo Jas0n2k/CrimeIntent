@@ -1,6 +1,5 @@
 package com.bignerdranch.android.criminalintent
 
-import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -14,7 +13,6 @@ import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.findNavController
-import androidx.navigation.navGraphViewModels
 import java.util.*
 
 private const val TAG = "CrimeFragment"
@@ -32,7 +30,6 @@ class CrimeFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.d(TAG, "onCreate()")
         val crimeId = arguments?.getSerializable(CrimeListFragment.ARG_CRIME_ID)
         if (crimeId !== null) {
             crimeDetailViewModel.loadCrime(crimeId as UUID)
@@ -45,7 +42,6 @@ class CrimeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Log.d(TAG, "onCreateView()")
         val view = inflater.inflate(R.layout.fragment_crime, container, false)
         titleField = view.findViewById(R.id.crime_title) as EditText
         dateButton = view.findViewById(R.id.crime_date) as Button
@@ -56,9 +52,15 @@ class CrimeFragment : Fragment() {
     override fun onStart() {
         super.onStart()
         crimeDetailViewModel.crimeLiveData.observe(viewLifecycleOwner) {
-            it?.let {
-                crime = it
-                Log.d(TAG, "crime changed: ${crime.date}")
+            it?.let { newCrime ->
+                crime = newCrime
+                crimeDetailViewModel.updateDate(crime.date)
+                updateUI()
+            }
+        }
+        crimeDetailViewModel.crimeDateLiveData.observe(viewLifecycleOwner) {
+            it?.let { newDate ->
+                crime.date = newDate
                 updateUI()
             }
         }
@@ -103,24 +105,9 @@ class CrimeFragment : Fragment() {
         titleField.addTextChangedListener(titleWatcher)
     }
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        Log.d(TAG, "onAttach()")
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d(TAG, "onDetach()")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG, "onPause()")
-    }
-
     override fun onStop() {
         super.onStop()
-        Log.d(TAG, "onStop()")
+        Log.d(TAG, "onStop() ${crime.date}")
         crimeDetailViewModel.saveCrime(crime)
     }
 
