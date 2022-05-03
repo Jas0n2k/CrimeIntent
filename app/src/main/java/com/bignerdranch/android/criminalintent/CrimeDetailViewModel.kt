@@ -1,34 +1,45 @@
 package com.bignerdranch.android.criminalintent
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.*
+import kotlinx.coroutines.launch
 import java.util.*
 
 class CrimeDetailViewModel : ViewModel() {
 
     private val crimeRepository = CrimeRepository.get()
-    private val crimeIdLiveData = MutableLiveData<UUID>()
-    var crimeLiveData: LiveData<Crime> =
+
+    private val crimeIdLiveData: MutableLiveData<UUID> = MutableLiveData<UUID>()
+    val crimeLiveData: LiveData<Crime> =
         Transformations.switchMap(crimeIdLiveData) {
             crimeRepository.getCrime(it)
         }
+
+    private val _crimeDateLiveData: MutableLiveData<Date> =
+        MutableLiveData<Date>().apply {
+            value = crimeLiveData.value?.date
+        }
+
+    val crimeDateLiveData: LiveData<Date> = _crimeDateLiveData
 
     fun loadCrime(crimeId: UUID) {
         crimeIdLiveData.value = crimeId
     }
 
     fun updateDate(date: Date) {
+        _crimeDateLiveData.value = date
         crimeLiveData.value?.date = date
     }
 
-    fun saveCrime(crime: Crime) {
-        crimeRepository.updateCrime(crime)
+    fun saveCrime() {
+        viewModelScope.launch {
+            crimeLiveData.value?.let { crimeRepository.updateCrime(it) }
+        }
     }
 
 
     fun addCrime(crime: Crime) {
-        crimeRepository.addCrime(crime)
+        viewModelScope.launch {
+            crimeRepository.addCrime(crime)
+        }
     }
 }
